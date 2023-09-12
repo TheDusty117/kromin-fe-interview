@@ -1,7 +1,10 @@
 import axios from 'axios'
 import LocalStorageManager from '../utilities/local-storage-manager'
 import config from '../config'
-import {LOCAL_STORAGE_ACCESS_TOKEN, LOCAL_STORAGE_REFRESH_TOKEN} from "../utilities/constants";
+import {
+    LOCAL_STORAGE_ACCESS_TOKEN,
+    LOCAL_STORAGE_REFRESH_TOKEN,
+} from '../utilities/constants'
 
 const axiosConfig = {
     baseURL: config.apiEndpoint,
@@ -23,7 +26,6 @@ const axiosConfig = {
 // create axios custom instance with custom config
 const axiosInstance = axios.create(axiosConfig)
 
-
 const attemptRefresh = async refreshToken => {
     const url = '/auth/refresh-token'
 
@@ -38,14 +40,18 @@ const attemptRefresh = async refreshToken => {
     LocalStorageManager.refreshToken.set(tokens[LOCAL_STORAGE_REFRESH_TOKEN])
 
     // update UserContext
-    window.dispatchEvent(new StorageEvent('storage', {
-        key: LOCAL_STORAGE_ACCESS_TOKEN,
-        newValue: tokens[LOCAL_STORAGE_ACCESS_TOKEN]
-    }))
-    window.dispatchEvent(new StorageEvent('storage', {
-        key: LOCAL_STORAGE_REFRESH_TOKEN,
-        newValue: tokens[LOCAL_STORAGE_REFRESH_TOKEN]
-    }))
+    window.dispatchEvent(
+        new StorageEvent('storage', {
+            key: LOCAL_STORAGE_ACCESS_TOKEN,
+            newValue: tokens[LOCAL_STORAGE_ACCESS_TOKEN],
+        })
+    )
+    window.dispatchEvent(
+        new StorageEvent('storage', {
+            key: LOCAL_STORAGE_REFRESH_TOKEN,
+            newValue: tokens[LOCAL_STORAGE_REFRESH_TOKEN],
+        })
+    )
     return tokens
 }
 
@@ -56,7 +62,6 @@ axiosInstance.interceptors.request.use(request => {
 })
 
 let pendingRefresh = false // prevent multiple refresh
-
 
 axiosInstance.interceptors.response.use(
     response => {
@@ -83,16 +88,18 @@ axiosInstance.interceptors.response.use(
                         pendingRefresh = false
                         return axiosInstance.request(originalRequest)
                     }
-                }catch (err){
+                } catch (err) {
                     console.log('cannot refresh token', err)
                 }
                 // if not returning a new access token, clear local storage
                 LocalStorageManager.removeAuthData()
                 // alert the UserContext that the storage is now clear
-                window.dispatchEvent(new StorageEvent('storage', {
-                    key: LOCAL_STORAGE_ACCESS_TOKEN,
-                    newValue: null
-                }))
+                window.dispatchEvent(
+                    new StorageEvent('storage', {
+                        key: LOCAL_STORAGE_ACCESS_TOKEN,
+                        newValue: null,
+                    })
+                )
                 // reject original request
                 return Promise.reject(error)
             default:
