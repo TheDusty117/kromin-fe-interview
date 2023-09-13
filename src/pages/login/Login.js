@@ -1,59 +1,75 @@
-import {createUseStyles} from "react-jss";
-import {FormProvider, useForm} from "react-hook-form";
-import {yupResolver} from "@hookform/resolvers/yup";
-import {DEFAULT_LOGIN_MOCK, LOGIN_MODEL, validationSchema} from "./loginModel";
-import Input from "../../components/Input";
-import {useState} from "react";
-import {EyeOffIcon, EyeOnIcon, SuccessIcon} from "../../theme/icons";
-import Button from "../../components/Button";
-import {Link} from "react-router-dom";
-import {ROUTE_SIGNUP} from "../../utilities/constants";
-import AuthAPI from "../../http/auth.http";
-import {handleApiError} from "../../utilities/helpers";
-import useError from "../../hooks/useError";
-import Logo from "../../components/Logo";
-import useUser from "../../hooks/useUser";
+import { createUseStyles } from 'react-jss'
+import { FormProvider, useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { DEFAULT_LOGIN_MOCK, LOGIN_MODEL, validationSchema } from './loginModel'
+import Input from '../../components/Input'
+import { useState } from 'react'
+import { EyeOffIcon, EyeOnIcon, SuccessIcon } from '../../theme/icons'
+import Button from '../../components/Button'
+import { Link } from 'react-router-dom'
+import { ROUTE_SIGNUP } from '../../utilities/constants'
+import AuthAPI from '../../http/auth.http'
+import { handleApiError } from '../../utilities/helpers'
+import useError from '../../hooks/useError'
+import Logo from '../../components/Logo'
+import useUser from '../../hooks/useUser'
+//importo toastify per creare il toast alert e success
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
+const notify = () => {
+    toast.error('Wrong email or password', {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'colored',
+    })
+}
 
 const useStyles = createUseStyles(theme => ({
     formTitle: {
         textAlign: 'left',
         [theme.mediaQueries.lUp]: {
-            textAlign: 'center'
-        }
+            textAlign: 'center',
+        },
     },
     formFooter: {
         textAlign: 'center',
         '& > * ': {
-            marginBottom: 24
-        }
+            marginBottom: 24,
+        },
     },
     formWrapper: {
         height: '100%',
         width: '100%',
         margin: '0 auto',
-        display: "flex",
+        display: 'flex',
         flexDirection: 'column',
         gap: 40,
         flexGrow: 1,
-        justifyContent: "space-between",
+        justifyContent: 'space-between',
         maxWidth: 348,
         [theme.mediaQueries.lUp]: {
             minWidth: 348,
-            justifyContent: "center",
+            justifyContent: 'center',
             height: 'auto',
-        }
+        },
     },
     fieldWrapper: {
-        display: "flex",
+        display: 'flex',
         flexDirection: 'column',
         gap: 16,
     },
 }))
 
 const Login = () => {
-    const showError = useError();
-    const {createUser} = useUser();
-    const [showPassword, setShowPassword] = useState(false);
+    const showError = useError()
+    const { createUser } = useUser()
+    const [showPassword, setShowPassword] = useState(false)
 
     const methods = useForm({
         shouldUnregister: false,
@@ -71,61 +87,73 @@ const Login = () => {
         formState: { errors, isSubmitting, touchedFields },
     } = methods
 
-    const submitHandler = async (values) => {
+    const submitHandler = async values => {
         try {
-            const {data} = await AuthAPI.loginUser(values)
+            const { data } = await AuthAPI.loginUser(values)
             createUser(data)
-        }catch (error){
+        } catch (error) {
             handleApiError({
                 error,
                 handleGeneralError: showError,
-                handleFormError: setError
+                handleFormError: setError,
             })
         }
     }
 
-    const classes = useStyles();
+    const classes = useStyles()
 
-    return <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(submitHandler)} className={classes.formWrapper}>
-            <div className={classes.fieldWrapper}>
-                <div className={classes.formTitle}>
-                    <Logo/>
+    return (
+        <FormProvider {...methods}>
+            <form
+                onSubmit={handleSubmit(submitHandler)}
+                className={classes.formWrapper}
+            >
+                <div className={classes.fieldWrapper}>
+                    <div className={classes.formTitle}>
+                        <Logo />
+                    </div>
+                    <Input
+                        type={'text'}
+                        label={'email'}
+                        placeholder={'your email'}
+                        touched={touchedFields[LOGIN_MODEL.email]}
+                        errors={errors[LOGIN_MODEL.email]}
+                        {...register(LOGIN_MODEL.email)}
+                    />
+                    <Input
+                        type={showPassword ? 'text' : 'password'}
+                        label={'password'}
+                        placeholder={'your password'}
+                        touched={touchedFields[LOGIN_MODEL.password]}
+                        errors={errors[LOGIN_MODEL.password]}
+                        {...register(LOGIN_MODEL.password)}
+                        statusIcon={
+                            showPassword ? <EyeOnIcon /> : <EyeOffIcon />
+                        }
+                        statusIconCallback={() =>
+                            setShowPassword(!showPassword)
+                        }
+                    />
                 </div>
-                <Input
-                    type={'text'}
-                    label={'email'}
-                    placeholder={'your email'}
-                    touched={touchedFields[LOGIN_MODEL.email]}
-                    errors={errors[LOGIN_MODEL.email]}
-                    {...register(LOGIN_MODEL.email)}
-                />
-                <Input
-                    type={showPassword ? 'text' : 'password'}
-                    label={'password'}
-                    placeholder={'your password'}
-                    touched={touchedFields[LOGIN_MODEL.password]}
-                    errors={errors[LOGIN_MODEL.password]}
-                    {...register(LOGIN_MODEL.password)}
-                    statusIcon={showPassword ? <EyeOnIcon /> : <EyeOffIcon />}
-                    statusIconCallback={() => setShowPassword(!showPassword)}
-                />
-            </div>
-            <div className={classes.formFooter}>
-                <Button
-                    icon={<SuccessIcon/>}
-                    iconPosition={'left'}
-                    disabled={isSubmitting}
-                    width={'100%'}
-                    type={'submit'}
-                    variant={'filled'}
-                >
-                    login
-                </Button>
-                new to todos ? <Link to={ROUTE_SIGNUP}>create an account</Link>
-            </div>
-        </form>
-    </FormProvider>
+                <div className={classes.formFooter}>
+                    <Button
+                        onClick={notify}
+                        icon={<SuccessIcon />}
+                        iconPosition={'left'}
+                        disabled={isSubmitting}
+                        width={'100%'}
+                        type={'submit'}
+                        variant={'filled'}
+                    >
+                        login
+                    </Button>
+                    new to todos ?{' '}
+                    <Link to={ROUTE_SIGNUP}>create an account</Link>
+                    <ToastContainer />
+                </div>
+            </form>
+        </FormProvider>
+    )
 }
 
-export default Login;
+export default Login
