@@ -2,8 +2,24 @@ import React, { forwardRef } from 'react'
 import { createUseStyles } from 'react-jss'
 import cx from 'classnames'
 import PropTypes from 'prop-types'
+//importo toastify per creare il toast alert e success
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
-const useStyles = createUseStyles((theme) => ({
+const notify = () => {
+    toast.success('Task completed', {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'colored',
+    })
+}
+
+const useStyles = createUseStyles(theme => ({
     root: {
         width: 'max-content',
         display: 'grid',
@@ -101,12 +117,15 @@ const Checkbox = forwardRef(
                     className={classes.input}
                     disabled={disabled}
                     ref={ref}
+                    onClick={notify}
                     {...props}
                 />
+
                 {!!errors && !props?.disabled && (
                     <small className={classes.error}>{errors.message}</small>
                 )}
                 {children}
+                <ToastContainer />
             </label>
         )
     }
