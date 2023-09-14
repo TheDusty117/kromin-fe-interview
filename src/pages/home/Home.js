@@ -8,6 +8,8 @@ import Column from '../../components/Column'
 import TasksAPI from '../../http/task.http'
 import useError from '../../hooks/useError'
 import { useEffect, useMemo, useState } from 'react'
+import { CSSTransition } from 'react-transition-group'
+
 import {
     dateIsInRange,
     dateRenderer,

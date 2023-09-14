@@ -21,7 +21,7 @@ const TasksAPI = {
         return axios.delete(url)
     },
     orderTasks: data => {
-        const url = 'https://todoapp.backend.k-stage.dev/api/todos/order'
+        const url = 'https://todoapp.backend.k-stage.dev/api/todos/order/'
         return axios.post(url, { todos: [...data] })
     },
 }
